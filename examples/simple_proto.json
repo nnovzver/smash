@@ -1,0 +1,11 @@
+{
+	"Name": "Simple",
+	"Codograms": [{
+		"Name": "First",
+		"Fields": [
+			{"Name": "i", "Length": 2},
+			{"Name": "j", "Length": 7},
+			{"Name": "k", "Length": 16},
+			{"Name": "l", "Length": 32}]}
+		]
+}
