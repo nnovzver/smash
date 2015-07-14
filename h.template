@@ -1,0 +1,7 @@
+{{range .Codograms}}
+typedef struct {{.Name}} {
+  {{range .Fields}}
+    {{.CType}} {{.Name}}; // {{.Length}} bits
+  {{end}}
+} {{.Name}};
+{{end}}

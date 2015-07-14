@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
+	"text/template"
 )
 
 type Field struct {
 	Name   string
 	Length float64
+	CType  string
 }
 
 type Codogram struct {
@@ -34,6 +38,40 @@ func ParseJsonModule(filename string) (Module, error) {
 	}
 
 	return m, nil
+}
+
+func (m *Module) AddCTypes() error {
+	for i, c := range m.Codograms {
+		for ii, f := range c.Fields {
+			var ctype string
+			switch {
+			case 0 < f.Length && f.Length <= 8:
+				ctype = "uint8_t"
+			case f.Length <= 16:
+				ctype = "uint16_t"
+			case f.Length <= 32:
+				ctype = "uint32_t"
+			default:
+				fmt.Errorf("unexpected Field.Length")
+			}
+			m.Codograms[i].Fields[ii].CType = ctype
+		}
+	}
+	return nil
+}
+
+func GenerateDotH(m *Module) (string, error) {
+	t, err := template.ParseFiles("h.template")
+	if err != nil {
+		return "", err
+	}
+	var b bytes.Buffer
+	err = t.Execute(&b, m)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
 }
 
 func main() {
