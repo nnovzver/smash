@@ -38,7 +38,7 @@ func TestGenerateDotH(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	g, err := GenerateDotH(&m)
+	g, err := m.GenerateDotH()
 	if err != nil {
 		t.Error(err)
 	}

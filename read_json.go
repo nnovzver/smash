@@ -60,7 +60,7 @@ func (m *Module) AddCTypes() error {
 	return nil
 }
 
-func GenerateDotH(m *Module) (string, error) {
+func (m *Module) GenerateDotH() (string, error) {
 	t, err := template.ParseFiles("h.template")
 	if err != nil {
 		return "", err
