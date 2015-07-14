@@ -15,8 +15,9 @@ type Field struct {
 }
 
 type Codogram struct {
-	Name   string
-	Fields []Field
+	Name    string
+	Fields  []Field
+	CLength int
 }
 
 type Module struct {
@@ -58,6 +59,17 @@ func (m *Module) AddCTypes() error {
 		}
 	}
 	return nil
+}
+
+func (m *Module) AddCLengths() {
+	var len int = 0
+	for i, c := range m.Codograms {
+		for _, f := range c.Fields {
+			len += int(f.Length)
+		}
+		m.Codograms[i].CLength = (len + 8) / 8
+	}
+
 }
 
 func (m *Module) GenerateDotH() (string, error) {
