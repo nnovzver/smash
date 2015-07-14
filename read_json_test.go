@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func simplifyString(s string) string {
+	var r string
+	for _, l := range strings.Split(s, "\n") {
+		l = strings.Trim(l, " \n\t")
+		if len(l) != 0 {
+			r += l + "\n"
+		}
+	}
+	return r
+}
+
 var simpleModule Module = Module{
 	Name: "Simple",
 	Codograms: []Codogram{
@@ -33,6 +44,22 @@ var simpleModuleCode Module = Module{
 				{Name: "l", Length: 32, CType: "uint32_t"},
 			},
 			CLength: 8,
+			CMarshal: `
+ch[0] |= (c->i<<6)&MASK(7, 6);
+
+ch[0] |= (c->j>>1)&MASK(5, 0);
+ch[1] |= (c->j<<7)&MASK(7, 7);
+
+ch[1] |= (c->k>>9)&MASK(6, 0);
+ch[2] |= (c->k>>1)&MASK(7, 0);
+ch[3] |= (c->k<<7)&MASK(7, 7);
+
+ch[3] |= (c->l>>25)&MASK(6, 0);
+ch[4] |= (c->l>>17)&MASK(7, 0);
+ch[5] |= (c->l>>9)&MASK(7, 0);
+ch[6] |= (c->l>>1)&MASK(7, 0);
+ch[7] |= (c->l<<7)&MASK(7, 7);
+`,
 		},
 	},
 }
@@ -68,6 +95,16 @@ func TestAddCTypes(t *testing.T) {
 	}
 }
 
+func TestAddCMarshal(t *testing.T) {
+	m := simpleModule
+	m.AddCMarshal()
+	res := simplifyString(m.Codograms[0].CMarshal)
+	orig := simplifyString(simpleModuleCode.Codograms[0].CMarshal)
+	if res != orig {
+		t.Errorf("Unexpected CMarshal\n res = %s\n orig = %s\n", res, orig)
+	}
+}
+
 func TestGenerateDotH(t *testing.T) {
 	m := simpleModule
 	err := m.AddCTypes()
@@ -86,11 +123,8 @@ typedef struct First {
   uint32_t l; // 32 bits
 } First;
 `
-	replacer := strings.NewReplacer(" ", "",
-		"\t", "",
-		"\n", "")
-	g = replacer.Replace(g)
-	orig = replacer.Replace(orig)
+	g = simplifyString(g)
+	orig = simplifyString(orig)
 	if g != orig {
 		t.Errorf("g != orig:\n%s\n%s", g, orig)
 	}

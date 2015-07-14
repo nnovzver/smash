@@ -15,9 +15,10 @@ type Field struct {
 }
 
 type Codogram struct {
-	Name    string
-	Fields  []Field
-	CLength int
+	Name     string
+	Fields   []Field
+	CLength  int
+	CMarshal string
 }
 
 type Module struct {
@@ -70,6 +71,53 @@ func (m *Module) AddCLengths() {
 		m.Codograms[i].CLength = (len + 8) / 8
 	}
 
+}
+
+func (m *Module) AddCMarshal() {
+	whereToShift := func(freeBitsInByte, highBitInField int) int {
+		return freeBitsInByte - highBitInField - 1
+	}
+
+	for cidx, c := range m.Codograms {
+		freeBitsInByte := 8
+		byteIndex := 0
+		var marshalCode string
+		for _, f := range c.Fields {
+			bitsToMarshal := int(f.Length)
+			bytesForField := ((bitsToMarshal - freeBitsInByte) + 15) / 8
+
+			for i := 0; i < bytesForField; i++ {
+				fieldShift := whereToShift(freeBitsInByte, bitsToMarshal-1)
+				var maskEnd int
+				var shiftSymbol string
+				if fieldShift < 0 {
+					// field is not fully packed
+					fieldShift = -fieldShift
+					shiftSymbol = ">>"
+					maskEnd = 0
+				} else {
+					// field is fully packed
+					shiftSymbol = "<<"
+					maskEnd = freeBitsInByte - bitsToMarshal
+				}
+				marshalCode += fmt.Sprintf("ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
+					byteIndex, f.Name, shiftSymbol, fieldShift,
+					freeBitsInByte-1, maskEnd)
+
+				if maskEnd == 0 {
+					// field is not fully packed
+					byteIndex++
+					bitsToMarshal -= freeBitsInByte
+					freeBitsInByte = 8
+				} else {
+					// field is fully packed
+					freeBitsInByte -= bitsToMarshal
+				}
+			}
+			marshalCode += fmt.Sprintf("\n")
+		}
+		m.Codograms[cidx].CMarshal = marshalCode
+	}
 }
 
 func (m *Module) GenerateDotH() (string, error) {
