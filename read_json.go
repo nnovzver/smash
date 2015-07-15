@@ -102,15 +102,15 @@ func (m *Module) AddCMarshalUnmarshal() {
 					shiftSymbol = "<<"
 					maskEnd = freeBitsInByte - bitsToMarshal
 				}
-				marshalCode += fmt.Sprintf("ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
+				marshalCode += fmt.Sprintf("  ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
 					byteIndex, f.Name, shiftSymbol, fieldShift,
 					freeBitsInByte-1, maskEnd)
 				if shiftSymbol == ">>" {
-					unmarshalCode += fmt.Sprintf("c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+					unmarshalCode += fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
 						f.Name, byteIndex, "<<", fieldShift,
 						freeBitsInByte-1+fieldShift, maskEnd+fieldShift)
 				} else {
-					unmarshalCode += fmt.Sprintf("c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+					unmarshalCode += fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
 						f.Name, byteIndex, ">>", fieldShift,
 						freeBitsInByte-1-fieldShift, maskEnd-fieldShift)
 				}
@@ -135,6 +135,20 @@ func (m *Module) AddCMarshalUnmarshal() {
 
 func (m *Module) GenerateDotH() (string, error) {
 	t, err := template.ParseFiles("h.template")
+	if err != nil {
+		return "", err
+	}
+	var b bytes.Buffer
+	err = t.Execute(&b, m)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
+}
+
+func (m *Module) GenerateDotC() (string, error) {
+	t, err := template.ParseFiles("c.template")
 	if err != nil {
 		return "", err
 	}

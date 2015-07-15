@@ -1,0 +1,33 @@
+#include <string.h>
+
+#include "{{.Name}}.h"
+
+#define MASK(start, end) ( \
+  (((1 << (start - end + 1)) - 1) << end) \
+)
+
+{{range .Codograms}}
+int Marshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
+  char *ch = buff;
+  if (size < {{.CLength}} || buff == NULL) return -1;
+
+  memset(buff, 0, size);
+
+{{.CMarshal}}
+
+  return 0;
+}
+{{end}}
+
+{{range .Codograms}}
+int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
+  char *ch = buff;
+  if (size < {{.CLength}} || buff == NULL) return -1;
+
+  memset(buff, 0, size);
+
+{{.CUnmarshal}}
+
+  return 0;
+}
+{{end}}
