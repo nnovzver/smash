@@ -15,10 +15,11 @@ type Field struct {
 }
 
 type Codogram struct {
-	Name     string
-	Fields   []Field
-	CLength  int
-	CMarshal string
+	Name       string
+	Fields     []Field
+	CLength    int
+	CMarshal   string
+	CUnmarshal string
 }
 
 type Module struct {
@@ -73,7 +74,7 @@ func (m *Module) AddCLengths() {
 
 }
 
-func (m *Module) AddCMarshal() {
+func (m *Module) AddCMarshalUnmarshal() {
 	whereToShift := func(freeBitsInByte, highBitInField int) int {
 		return freeBitsInByte - highBitInField - 1
 	}
@@ -82,6 +83,7 @@ func (m *Module) AddCMarshal() {
 		freeBitsInByte := 8
 		byteIndex := 0
 		var marshalCode string
+		var unmarshalCode string
 		for _, f := range c.Fields {
 			bitsToMarshal := int(f.Length)
 			bytesForField := ((bitsToMarshal - freeBitsInByte) + 15) / 8
@@ -103,6 +105,15 @@ func (m *Module) AddCMarshal() {
 				marshalCode += fmt.Sprintf("ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
 					byteIndex, f.Name, shiftSymbol, fieldShift,
 					freeBitsInByte-1, maskEnd)
+				if shiftSymbol == ">>" {
+					unmarshalCode += fmt.Sprintf("c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+						f.Name, byteIndex, "<<", fieldShift,
+						freeBitsInByte-1+fieldShift, maskEnd+fieldShift)
+				} else {
+					unmarshalCode += fmt.Sprintf("c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+						f.Name, byteIndex, ">>", fieldShift,
+						freeBitsInByte-1-fieldShift, maskEnd-fieldShift)
+				}
 
 				if maskEnd == 0 {
 					// field is not fully packed
@@ -115,8 +126,10 @@ func (m *Module) AddCMarshal() {
 				}
 			}
 			marshalCode += fmt.Sprintf("\n")
+			unmarshalCode += fmt.Sprintf("\n")
 		}
 		m.Codograms[cidx].CMarshal = marshalCode
+		m.Codograms[cidx].CUnmarshal = unmarshalCode
 	}
 }
 

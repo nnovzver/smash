@@ -60,6 +60,22 @@ ch[5] |= (c->l>>9)&MASK(7, 0);
 ch[6] |= (c->l>>1)&MASK(7, 0);
 ch[7] |= (c->l<<7)&MASK(7, 7);
 `,
+			CUnmarshal: `
+c->i |= (ch[0]>>6)&MASK(1, 0);
+
+c->j |= (ch[0]<<1)&MASK(6, 1);
+c->j |= (ch[1]>>7)&MASK(0, 0);
+
+c->k |= (ch[1]<<9)&MASK(15, 9);
+c->k |= (ch[2]<<1)&MASK(8, 1);
+c->k |= (ch[3]>>7)&MASK(0, 0);
+
+c->l |= (ch[3]<<25)&MASK(31, 25);
+c->l |= (ch[4]<<17)&MASK(24, 17);
+c->l |= (ch[5]<<9)&MASK(16, 9);
+c->l |= (ch[6]<<1)&MASK(8, 1);
+c->l |= (ch[7]>>7)&MASK(0, 0);
+`,
 		},
 	},
 }
@@ -97,11 +113,21 @@ func TestAddCTypes(t *testing.T) {
 
 func TestAddCMarshal(t *testing.T) {
 	m := simpleModule
-	m.AddCMarshal()
+	m.AddCMarshalUnmarshal()
 	res := simplifyString(m.Codograms[0].CMarshal)
 	orig := simplifyString(simpleModuleCode.Codograms[0].CMarshal)
 	if res != orig {
 		t.Errorf("Unexpected CMarshal\n res = %s\n orig = %s\n", res, orig)
+	}
+}
+
+func TestAddCUnmarshal(t *testing.T) {
+	m := simpleModule
+	m.AddCMarshalUnmarshal()
+	res := simplifyString(m.Codograms[0].CUnmarshal)
+	orig := simplifyString(simpleModuleCode.Codograms[0].CUnmarshal)
+	if res != orig {
+		t.Errorf("Unexpected CUnmarshal\n res = %s\n orig = %s\n", res, orig)
 	}
 }
 
