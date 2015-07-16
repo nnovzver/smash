@@ -1,4 +1,6 @@
-/*
+package main
+
+var c_template = `/*
  * Implementation for {{.Name}} codogram module.
  * Auto-generated file! DO NOT MODIFY!
  */
@@ -17,6 +19,11 @@ int Marshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
   if (size < {{.CLength}} || buff == NULL) return -1;
 
   memset(buff, 0, size);
+  {{range .Fields}}
+    {{if eq .Type getConstId}}
+  c->{{.Name}} = {{.Const}};
+    {{end}}
+  {{end}}
 
 {{.CMarshal}}
 
@@ -60,3 +67,4 @@ int is{{.Name}}(void *buff, size_t size) {
   }
 }
 {{end}}
+`

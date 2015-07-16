@@ -168,8 +168,8 @@ func GenerateCFiles(jfilename string, wrH io.Writer, wrC io.Writer) error {
 	m.addCLengths()
 	m.addCCode()
 
-	ht := template.New("h.template")
-	ht, err = ht.ParseFiles("h.template")
+	ht := template.New("h_template")
+	ht, err = ht.Parse(h_template)
 	if err != nil {
 		return err
 	}
@@ -178,9 +178,9 @@ func GenerateCFiles(jfilename string, wrH io.Writer, wrC io.Writer) error {
 		return err
 	}
 
-	ct := template.New("c.template")
+	ct := template.New("c_template")
 	ct = ct.Funcs(template.FuncMap{"getConstId": GetConstId})
-	ct, err = ct.ParseFiles("c.template")
+	ct, err = ct.Parse(c_template)
 	if err != nil {
 		return err
 	}
