@@ -156,7 +156,7 @@ func (m *Module) addCCode() {
 	}
 }
 
-func GenerateCFiles(jfilename string, wr io.Writer) error {
+func GenerateCFiles(jfilename string, wrH io.Writer, wrC io.Writer) error {
 	m, err := parseJsonModule(jfilename)
 	if err != nil {
 		return err
@@ -173,7 +173,7 @@ func GenerateCFiles(jfilename string, wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = ht.Execute(wr, m)
+	err = ht.Execute(wrH, m)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func GenerateCFiles(jfilename string, wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = ct.Execute(wr, m)
+	err = ct.Execute(wrC, m)
 	if err != nil {
 		return err
 	}
