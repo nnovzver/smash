@@ -191,7 +191,3 @@ func GenerateCFiles(jfilename string, wr io.Writer) error {
 
 	return nil
 }
-
-func main() {
-
-}
