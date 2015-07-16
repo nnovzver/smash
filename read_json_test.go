@@ -87,7 +87,7 @@ j |= (ch[1]>>7)&MASK(0, 0);
 }
 
 func TestParseJsonModule(t *testing.T) {
-	m, err := ParseJsonModule("examples/simple_proto.json")
+	m, err := parseJsonModule("examples/simple_proto.json")
 	if err != nil {
 		t.Error(err)
 	}
@@ -99,7 +99,7 @@ func TestParseJsonModule(t *testing.T) {
 
 func TestAddCLengths(t *testing.T) {
 	m := simpleModule
-	m.AddCLengths()
+	m.addCLengths()
 	res := m.Codograms[0].CLength
 	orig := simpleModuleCode.Codograms[0].CLength
 	if res != orig {
@@ -109,7 +109,7 @@ func TestAddCLengths(t *testing.T) {
 
 func TestAddCTypes(t *testing.T) {
 	m := simpleModule
-	m.AddCTypes()
+	m.addCTypes()
 	for i, f := range m.Codograms[0].Fields {
 		res := f.CType
 		orig := simpleModuleCode.Codograms[0].Fields[i].CType
@@ -121,7 +121,7 @@ func TestAddCTypes(t *testing.T) {
 
 func TestAddCMarshal(t *testing.T) {
 	m := simpleModule
-	m.AddCCode()
+	m.addCCode()
 	res := simplifyString(m.Codograms[0].CMarshal)
 	orig := simplifyString(simpleModuleCode.Codograms[0].CMarshal)
 	if res != orig {
@@ -131,7 +131,7 @@ func TestAddCMarshal(t *testing.T) {
 
 func TestAddCUnmarshal(t *testing.T) {
 	m := simpleModule
-	m.AddCCode()
+	m.addCCode()
 	res := simplifyString(m.Codograms[0].CUnmarshal)
 	orig := simplifyString(simpleModuleCode.Codograms[0].CUnmarshal)
 	if res != orig {
@@ -141,7 +141,7 @@ func TestAddCUnmarshal(t *testing.T) {
 
 func TestAddCTest(t *testing.T) {
 	m := simpleModule
-	m.AddCCode()
+	m.addCCode()
 	res := simplifyString(m.Codograms[0].CTest)
 	orig := simplifyString(simpleModuleCode.Codograms[0].CTest)
 	if res != orig {

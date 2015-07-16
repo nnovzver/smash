@@ -39,7 +39,7 @@ type Module struct {
 	Codograms []Codogram
 }
 
-func ParseJsonModule(filename string) (Module, error) {
+func parseJsonModule(filename string) (Module, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return Module{}, err
@@ -55,7 +55,7 @@ func ParseJsonModule(filename string) (Module, error) {
 	return m, nil
 }
 
-func (m *Module) AddCTypes() error {
+func (m *Module) addCTypes() error {
 	for i, c := range m.Codograms {
 		for ii, f := range c.Fields {
 			var ctype string
@@ -75,7 +75,7 @@ func (m *Module) AddCTypes() error {
 	return nil
 }
 
-func (m *Module) AddCLengths() {
+func (m *Module) addCLengths() {
 	var len int = 0
 	for i, c := range m.Codograms {
 		for _, f := range c.Fields {
@@ -86,7 +86,7 @@ func (m *Module) AddCLengths() {
 
 }
 
-func (m *Module) AddCCode() {
+func (m *Module) addCCode() {
 	whereToShift := func(freeBitsInByte, highBitInField int) int {
 		return freeBitsInByte - highBitInField - 1
 	}
@@ -157,16 +157,16 @@ func (m *Module) AddCCode() {
 }
 
 func GenerateCFiles(jfilename string, wr io.Writer) error {
-	m, err := ParseJsonModule(jfilename)
+	m, err := parseJsonModule(jfilename)
 	if err != nil {
 		return err
 	}
-	err = m.AddCTypes()
+	err = m.addCTypes()
 	if err != nil {
 		return err
 	}
-	m.AddCLengths()
-	m.AddCCode()
+	m.addCLengths()
+	m.addCCode()
 
 	ht := template.New("h.template")
 	ht, err = ht.ParseFiles("h.template")
