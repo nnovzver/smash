@@ -1,3 +1,7 @@
+/*
+ * Header for {{.Name}} codogram module
+ * Auto-generated file! DO NOT MODIFY!
+ */
 {{range .Codograms}}
 typedef struct {{.Name}} {
   {{range .Fields}}

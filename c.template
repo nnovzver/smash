@@ -1,3 +1,8 @@
+/*
+ * Implementation for {{.Name}} codogram module.
+ * Auto-generated file! DO NOT MODIFY!
+ */
+
 #include <string.h>
 
 #include "{{.Name}}.h"
@@ -17,9 +22,7 @@ int Marshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
 
   return 0;
 }
-{{end}}
 
-{{range .Codograms}}
 int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
   char *ch = buff;
   if (size < {{.CLength}} || buff == NULL) return -1;
@@ -29,5 +32,31 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
 {{.CUnmarshal}}
 
   return 0;
+}
+
+int is{{.Name}}(void *buff, size_t size) {
+  {{range .Fields}}
+    {{if eq .Type getConstId}}
+  {{.CType}} {{.Name}};
+    {{end}}
+  {{end}}
+  char *ch = buff;
+  if (size < {{.CLength}} || buff == NULL) return -1;
+
+{{.CTest}}
+
+  if (
+  {{range $index, $field := .Fields}}
+    {{if eq .Type getConstId}}
+      {{if $index}}&& {{.Name}} == {{.Const}}
+      {{else}}{{.Name}} == {{.Const}}
+      {{end}}
+    {{end}}
+  {{end}}
+  ) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 {{end}}

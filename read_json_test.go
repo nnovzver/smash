@@ -23,8 +23,8 @@ var simpleModule Module = Module{
 		{
 			Name: "First",
 			Fields: []Field{
-				{Name: "i", Length: 2},
-				{Name: "j", Length: 7},
+				{Name: "i", Length: 2, Type: 1, Const: 2},
+				{Name: "j", Length: 7, Type: 1, Const: 4},
 				{Name: "k", Length: 16},
 				{Name: "l", Length: 32},
 			},
@@ -76,6 +76,12 @@ c->l |= (ch[5]<<9)&MASK(16, 9);
 c->l |= (ch[6]<<1)&MASK(8, 1);
 c->l |= (ch[7]>>7)&MASK(0, 0);
 `,
+			CTest: `
+i |= (ch[0]>>6)&MASK(1, 0);
+
+j |= (ch[0]<<1)&MASK(6, 1);
+j |= (ch[1]>>7)&MASK(0, 0);
+`,
 		},
 	},
 }
@@ -104,16 +110,18 @@ func TestAddCLengths(t *testing.T) {
 func TestAddCTypes(t *testing.T) {
 	m := simpleModule
 	m.AddCTypes()
-	res := m.Codograms[0].Fields
-	orig := simpleModuleCode.Codograms[0].Fields
-	if !reflect.DeepEqual(res, orig) {
-		t.Errorf("Unexpected CType\n res = %+v\n orig = %+v\n", res, orig)
+	for i, f := range m.Codograms[0].Fields {
+		res := f.CType
+		orig := simpleModuleCode.Codograms[0].Fields[i].CType
+		if !reflect.DeepEqual(res, orig) {
+			t.Errorf("Unexpected CType\n res = %+v\n orig = %+v\n", res, orig)
+		}
 	}
 }
 
 func TestAddCMarshal(t *testing.T) {
 	m := simpleModule
-	m.AddCMarshalUnmarshal()
+	m.AddCCode()
 	res := simplifyString(m.Codograms[0].CMarshal)
 	orig := simplifyString(simpleModuleCode.Codograms[0].CMarshal)
 	if res != orig {
@@ -123,7 +131,7 @@ func TestAddCMarshal(t *testing.T) {
 
 func TestAddCUnmarshal(t *testing.T) {
 	m := simpleModule
-	m.AddCMarshalUnmarshal()
+	m.AddCCode()
 	res := simplifyString(m.Codograms[0].CUnmarshal)
 	orig := simplifyString(simpleModuleCode.Codograms[0].CUnmarshal)
 	if res != orig {
@@ -131,27 +139,12 @@ func TestAddCUnmarshal(t *testing.T) {
 	}
 }
 
-func TestGenerateDotH(t *testing.T) {
+func TestAddCTest(t *testing.T) {
 	m := simpleModule
-	err := m.AddCTypes()
-	if err != nil {
-		t.Error(err)
-	}
-	g, err := m.GenerateDotH()
-	if err != nil {
-		t.Error(err)
-	}
-	orig := `
-typedef struct First {
-  uint8_t i; // 2 bits
-  uint8_t j; // 7 bits
-  uint16_t k; // 16 bits
-  uint32_t l; // 32 bits
-} First;
-`
-	g = simplifyString(g)
-	orig = simplifyString(orig)
-	if g != orig {
-		t.Errorf("g != orig:\n%s\n%s", g, orig)
+	m.AddCCode()
+	res := simplifyString(m.Codograms[0].CTest)
+	orig := simplifyString(simpleModuleCode.Codograms[0].CTest)
+	if res != orig {
+		t.Errorf("Unexpected CTest\n res =\n %s\n orig =\n %s\n", res, orig)
 	}
 }

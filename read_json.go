@@ -1,16 +1,27 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 	"text/template"
 )
+
+const (
+	ConstId = 1
+)
+
+func GetConstId() float64 {
+	return float64(ConstId)
+}
 
 type Field struct {
 	Name   string
 	Length float64
+	Type   float64
+	Const  float64
 	CType  string
 }
 
@@ -20,6 +31,7 @@ type Codogram struct {
 	CLength    int
 	CMarshal   string
 	CUnmarshal string
+	CTest      string
 }
 
 type Module struct {
@@ -74,7 +86,7 @@ func (m *Module) AddCLengths() {
 
 }
 
-func (m *Module) AddCMarshalUnmarshal() {
+func (m *Module) AddCCode() {
 	whereToShift := func(freeBitsInByte, highBitInField int) int {
 		return freeBitsInByte - highBitInField - 1
 	}
@@ -84,6 +96,7 @@ func (m *Module) AddCMarshalUnmarshal() {
 		byteIndex := 0
 		var marshalCode string
 		var unmarshalCode string
+		var testCode string
 		for _, f := range c.Fields {
 			bitsToMarshal := int(f.Length)
 			bytesForField := ((bitsToMarshal - freeBitsInByte) + 15) / 8
@@ -102,17 +115,25 @@ func (m *Module) AddCMarshalUnmarshal() {
 					shiftSymbol = "<<"
 					maskEnd = freeBitsInByte - bitsToMarshal
 				}
+				// generate Marshal
 				marshalCode += fmt.Sprintf("  ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
 					byteIndex, f.Name, shiftSymbol, fieldShift,
 					freeBitsInByte-1, maskEnd)
+				// generate Unmarshal
+				var unmarshalCodeTemp string
 				if shiftSymbol == ">>" {
-					unmarshalCode += fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+					unmarshalCodeTemp = fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
 						f.Name, byteIndex, "<<", fieldShift,
 						freeBitsInByte-1+fieldShift, maskEnd+fieldShift)
 				} else {
-					unmarshalCode += fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+					unmarshalCodeTemp = fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
 						f.Name, byteIndex, ">>", fieldShift,
 						freeBitsInByte-1-fieldShift, maskEnd-fieldShift)
+				}
+				unmarshalCode += unmarshalCodeTemp
+				// generate Test
+				if f.Type == ConstId {
+					testCode += strings.Replace(unmarshalCodeTemp, "c->", "", 1)
 				}
 
 				if maskEnd == 0 {
@@ -125,40 +146,50 @@ func (m *Module) AddCMarshalUnmarshal() {
 					freeBitsInByte -= bitsToMarshal
 				}
 			}
-			marshalCode += fmt.Sprintf("\n")
-			unmarshalCode += fmt.Sprintf("\n")
+			marshalCode += "\n"
+			unmarshalCode += "\n"
+			testCode += "\n"
 		}
 		m.Codograms[cidx].CMarshal = marshalCode
 		m.Codograms[cidx].CUnmarshal = unmarshalCode
+		m.Codograms[cidx].CTest = testCode
 	}
 }
 
-func (m *Module) GenerateDotH() (string, error) {
-	t, err := template.ParseFiles("h.template")
+func GenerateCFiles(jfilename string, wr io.Writer) error {
+	m, err := ParseJsonModule(jfilename)
 	if err != nil {
-		return "", err
+		return err
 	}
-	var b bytes.Buffer
-	err = t.Execute(&b, m)
+	err = m.AddCTypes()
 	if err != nil {
-		return "", err
+		return err
+	}
+	m.AddCLengths()
+	m.AddCCode()
+
+	ht := template.New("h.template")
+	ht, err = ht.ParseFiles("h.template")
+	if err != nil {
+		return err
+	}
+	err = ht.Execute(wr, m)
+	if err != nil {
+		return err
 	}
 
-	return b.String(), nil
-}
-
-func (m *Module) GenerateDotC() (string, error) {
-	t, err := template.ParseFiles("c.template")
+	ct := template.New("c.template")
+	ct = ct.Funcs(template.FuncMap{"getConstId": GetConstId})
+	ct, err = ct.ParseFiles("c.template")
 	if err != nil {
-		return "", err
+		return err
 	}
-	var b bytes.Buffer
-	err = t.Execute(&b, m)
+	err = ct.Execute(wr, m)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return b.String(), nil
+	return nil
 }
 
 func main() {
