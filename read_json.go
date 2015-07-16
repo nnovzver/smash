@@ -55,7 +55,7 @@ func (m *Module) AddCTypes() error {
 			case f.Length <= 32:
 				ctype = "uint32_t"
 			default:
-				fmt.Errorf("unexpected Field.Length")
+				return fmt.Errorf("unexpected Field.Length")
 			}
 			m.Codograms[i].Fields[ii].CType = ctype
 		}
