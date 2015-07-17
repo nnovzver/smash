@@ -7,7 +7,7 @@ var c_template = `/*
 
 #include <string.h>
 
-#include "{{.Name}}.h"
+#include "{{.Name}}.gen.h"
 
 #define MASK(start, end) ( \
   (((1 << (start - end + 1)) - 1) << end) \
@@ -34,7 +34,7 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
   char *ch = buff;
   if (size < {{.CLength}} || buff == NULL) return -1;
 
-  memset(buff, 0, size);
+  memset(c, 0, size);
 
 {{.CUnmarshal}}
 
@@ -44,7 +44,7 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
 int is{{.Name}}(void *buff, size_t size) {
   {{range .Fields}}
     {{if eq .Type getConstId}}
-  {{.CType}} {{.Name}};
+  {{.CType}} {{.Name}} = 0;
     {{end}}
   {{end}}
   char *ch = buff;

@@ -201,11 +201,11 @@ func GenerateCFiles(jfilename string) (string, error) {
 	str += string(cbuf.String())
 
 	// create files
-	hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".h")
+	hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".gen.h")
 	if err != nil {
 		return "", err
 	}
-	cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".c")
+	cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".gen.c")
 	if err != nil {
 		return "", err
 	}
