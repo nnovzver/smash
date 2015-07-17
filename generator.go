@@ -82,7 +82,7 @@ func (m *Module) addCLengths() {
 		for _, f := range c.Fields {
 			len += int(f.Length)
 		}
-		m.Codograms[i].CLength = (len + 8) / 8
+		m.Codograms[i].CLength = (len + 7) / 8
 	}
 
 }
