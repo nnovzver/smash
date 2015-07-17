@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -156,38 +157,68 @@ func (m *Module) addCCode() {
 	}
 }
 
-func GenerateCFiles(jfilename string, wrH io.Writer, wrC io.Writer) error {
+func GenerateCFiles(jfilename string) (string, error) {
+	// parse json module
 	m, err := parseJsonModule(jfilename)
 	if err != nil {
-		return err
+		return "", err
 	}
 	err = m.addCTypes()
 	if err != nil {
-		return err
+		return "", err
 	}
 	m.addCLengths()
 	m.addCCode()
 
+	// create buffers
+	hbuf := new(bytes.Buffer)
+	cbuf := new(bytes.Buffer)
+
+	// generate code
 	ht := template.New("h_template")
 	ht, err = ht.Parse(h_template)
 	if err != nil {
-		return err
+		return "", err
 	}
-	err = ht.Execute(wrH, m)
+	err = ht.Execute(hbuf, m)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	ct := template.New("c_template")
 	ct = ct.Funcs(template.FuncMap{"getConstId": GetConstId})
 	ct, err = ct.Parse(c_template)
 	if err != nil {
-		return err
+		return "", err
 	}
-	err = ct.Execute(wrC, m)
+	err = ct.Execute(cbuf, m)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	// write to str from buffers
+	str := string(hbuf.String())
+	str += string(cbuf.String())
+
+	// create files
+	hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".h")
+	if err != nil {
+		return "", err
+	}
+	cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".c")
+	if err != nil {
+		return "", err
+	}
+
+	// write to files from buffers
+	_, err = hbuf.WriteTo(hfile)
+	if err != nil {
+		return "", err
+	}
+	_, err = cbuf.WriteTo(cfile)
+	if err != nil {
+		return "", err
+	}
+
+	return str, nil
 }

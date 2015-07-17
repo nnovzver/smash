@@ -4,18 +4,18 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 )
 
 var stdOut bool
+
 func init() {
 	flag.BoolVar(&stdOut, "s", false, "print generated code to stdout")
 }
 
 func main() {
 	flag.Usage = func() {
-        fmt.Fprintf(os.Stderr, "Usage: %s [flags] json_module_filename\n", os.Args[0])
-        flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "Usage: %s [flags] json_module_filename\n", os.Args[0])
+		flag.PrintDefaults()
 	}
 
 	flag.Parse()
@@ -33,20 +33,11 @@ func main() {
 		return
 	}
 
-	var hfile = os.Stdout
-	var cfile = os.Stdout
-	if !stdOut {
-		hfile, err = os.Create(strings.TrimSuffix(filename, "json") + "h")
-		if err != nil {
-			panic(err)
-		}
-		cfile, err = os.Create(strings.TrimSuffix(filename, "json") + "c")
-		if err != nil {
-			panic(err)
-		}
-	}
-	err = GenerateCFiles(filename, hfile, cfile)
+	code, err := GenerateCFiles(filename)
 	if err != nil {
 		panic(err)
+	}
+	if stdOut {
+		fmt.Println(code)
 	}
 }
