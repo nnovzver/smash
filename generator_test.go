@@ -87,7 +87,7 @@ j |= (ch[1]>>7)&MASK(0, 0);
 }
 
 func TestParseJsonModule(t *testing.T) {
-	m, err := parseJsonModule("examples/simple_proto.json")
+	m, err := parseJsonModule("tests/simple_proto.json")
 	if err != nil {
 		t.Error(err)
 	}
