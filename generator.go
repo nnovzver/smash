@@ -11,22 +11,22 @@ import (
 )
 
 const (
-	ConstId  = 1
-	SimpleId = 2
-	BlobId   = 3
-	TempId   = 4
+	ConstId  = "const"
+	SimpleId = "simple"
+	BlobId   = "blob"
+	TempId   = "temp"
 )
 
-func GetConstId() float64 {
-	return float64(ConstId)
+func GetConstId() string {
+	return ConstId
 }
 
-func GetBlobId() float64 {
-	return float64(BlobId)
+func GetBlobId() string {
+	return BlobId
 }
 
-func GetTempId() float64 {
-	return float64(TempId)
+func GetTempId() string {
+	return TempId
 }
 
 func BytesInBits(bits float64) float64 {
@@ -36,7 +36,7 @@ func BytesInBits(bits float64) float64 {
 type Field struct {
 	Name   string
 	Length float64
-	Type   float64
+	Type   string
 	Const  float64
 	CType  string
 }
@@ -195,9 +195,6 @@ func (m *Module) addCCode() {
 					freeBitsInByte -= bitsToMarshal
 				}
 			}
-			// marshalCode += "\n"
-			// unmarshalCode += "\n"
-			// testCode += "\n"
 		}
 		m.Codograms[cidx].CMarshal = marshalCode
 		m.Codograms[cidx].CUnmarshal = unmarshalCode

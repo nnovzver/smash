@@ -23,12 +23,12 @@ var simpleModule Module = Module{
 		{
 			Name: "First",
 			Fields: []Field{
-				{Name: "i", Length: 2, Type: 1, Const: 2},
-				{Name: "j", Length: 7, Type: 1, Const: 4},
-				{Name: "k", Length: 16, Type: 2},
-				{Name: "l", Length: 32, Type: 2},
-				{Name: "t", Length: 7, Type: 4},
-				{Name: "b", Length: 128, Type: 3},
+				{Name: "i", Length: 2, Type: "const", Const: 2},
+				{Name: "j", Length: 7, Type: "const", Const: 4},
+				{Name: "k", Length: 16, Type: "simple"},
+				{Name: "l", Length: 32, Type: "simple"},
+				{Name: "t", Length: 7, Type: "temp"},
+				{Name: "b", Length: 128, Type: "blob"},
 			},
 		},
 	},
