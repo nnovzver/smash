@@ -25,7 +25,7 @@ var simpleModule Module = Module{
 			Fields: []Field{
 				{Name: "i", Length: 2, Type: "const", Const: 2},
 				{Name: "j", Length: 7, Type: "const", Const: 4},
-				{Name: "k", Length: 16, Type: "simple"},
+				{Name: "k", Length: 16, Type: "simple", Enum: "APPLE:1, PEAR:2"},
 				{Name: "l", Length: 32, Type: "simple"},
 				{Name: "t", Length: 7, Type: "temp"},
 				{Name: "b", Length: 128, Type: "blob"},
@@ -88,6 +88,8 @@ j |= (ch[1]>>7)&MASK(0, 0);
 `,
 
 			CMacros: `
+#define First_ENUM_k_APPLE 1
+#define First_ENUM_k_PEAR 2
 #define First_BEGIN_b_BLOB 8
 #define First_SIZE_b_BLOB 16
 `,

@@ -38,6 +38,7 @@ type Field struct {
 	Length float64
 	Type   string
 	Const  float64
+	Enum   string
 	CType  string
 }
 
@@ -138,6 +139,7 @@ func (m *Module) addCCode() {
 		var testCode string
 		var macrosCode string
 		for _, f := range c.Fields {
+			// generate Macros
 			if f.Type == BlobId {
 				macrosCode += fmt.Sprintf("#define %s_BEGIN_%s_BLOB %d\n",
 					c.Name, f.Name, byteIndex)
@@ -145,6 +147,18 @@ func (m *Module) addCCode() {
 					c.Name, f.Name, int(f.Length)/8)
 				continue
 			}
+			if f.Enum != "" {
+				for _, s := range strings.Split(f.Enum, ",") {
+					val := strings.Split(s, ":")
+					if val != nil {
+						macrosCode += fmt.Sprintf("#define %s_ENUM_%s_%s %s\n",
+							c.Name, f.Name,
+							strings.Trim(val[0], " \t\n"),
+							strings.Trim(val[1], " \t\n"))
+					}
+				}
+			}
+
 			bitsToMarshal := int(f.Length)
 			bytesForField := ((bitsToMarshal - freeBitsInByte) + 15) / 8
 
