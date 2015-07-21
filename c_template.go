@@ -41,6 +41,7 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
   return 0;
 }
 
+{{if .CTest}}
 int is{{.Name}}(void *buff, size_t size) {
   {{range .Fields}}
     {{if eq .Type getConstId}}
@@ -66,5 +67,6 @@ int is{{.Name}}(void *buff, size_t size) {
     return 0;
   }
 }
+{{end}}
 {{end}}
 `

@@ -11,11 +11,26 @@ import (
 )
 
 const (
-	ConstId = 1
+	ConstId  = 1
+	SimpleId = 2
+	BlobId   = 3
+	TempId   = 4
 )
 
 func GetConstId() float64 {
 	return float64(ConstId)
+}
+
+func GetBlobId() float64 {
+	return float64(BlobId)
+}
+
+func GetTempId() float64 {
+	return float64(TempId)
+}
+
+func BytesInBits(bits float64) float64 {
+	return bits / 8
 }
 
 type Field struct {
@@ -33,6 +48,7 @@ type Codogram struct {
 	CMarshal   string
 	CUnmarshal string
 	CTest      string
+	CMacros    string
 }
 
 type Module struct {
@@ -53,22 +69,44 @@ func parseJsonModule(filename string) (Module, error) {
 		return Module{}, err
 	}
 
+	err = m.checkModule()
+	if err != nil {
+		return Module{}, err
+	}
+
 	return m, nil
+}
+
+func (m *Module) checkModule() error {
+	// check blob boundaries
+	for _, c := range m.Codograms {
+		bitsBefore := 0
+		for _, f := range c.Fields {
+			if f.Type == BlobId && (bitsBefore % 8 != 0 || int(f.Length) % 8 != 0) {
+				return fmt.Errorf("Blob %s in codogram %s not aligned!", f.Name, c.Name)
+			}
+			bitsBefore += int(f.Length)
+		}
+	}
+
+	return nil
 }
 
 func (m *Module) addCTypes() error {
 	for i, c := range m.Codograms {
 		for ii, f := range c.Fields {
 			var ctype string
-			switch {
-			case 0 < f.Length && f.Length <= 8:
-				ctype = "uint8_t"
-			case f.Length <= 16:
-				ctype = "uint16_t"
-			case f.Length <= 32:
-				ctype = "uint32_t"
-			default:
-				return fmt.Errorf("unexpected Field.Length")
+			if f.Type == SimpleId || f.Type == ConstId {
+				switch {
+				case 0 < f.Length && f.Length <= 8:
+					ctype = "uint8_t"
+				case f.Length <= 16:
+					ctype = "uint16_t"
+				case f.Length <= 32:
+					ctype = "uint32_t"
+				default:
+					return fmt.Errorf("unexpected Field.Length")
+				}
 			}
 			m.Codograms[i].Fields[ii].CType = ctype
 		}
@@ -98,7 +136,15 @@ func (m *Module) addCCode() {
 		var marshalCode string
 		var unmarshalCode string
 		var testCode string
+		var macrosCode string
 		for _, f := range c.Fields {
+			if f.Type == BlobId {
+				macrosCode += fmt.Sprintf("#define %s_BEGIN_%s_BLOB %d\n",
+				                          c.Name, f.Name, byteIndex)
+				macrosCode += fmt.Sprintf("#define %s_SIZE_%s_BLOB %d\n",
+				                          c.Name, f.Name, int(f.Length) / 8)
+				continue
+			}
 			bitsToMarshal := int(f.Length)
 			bytesForField := ((bitsToMarshal - freeBitsInByte) + 15) / 8
 
@@ -116,25 +162,27 @@ func (m *Module) addCCode() {
 					shiftSymbol = "<<"
 					maskEnd = freeBitsInByte - bitsToMarshal
 				}
-				// generate Marshal
-				marshalCode += fmt.Sprintf("  ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
-					byteIndex, f.Name, shiftSymbol, fieldShift,
-					freeBitsInByte-1, maskEnd)
-				// generate Unmarshal
-				var unmarshalCodeTemp string
-				if shiftSymbol == ">>" {
-					unmarshalCodeTemp = fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
-						f.Name, byteIndex, "<<", fieldShift,
-						freeBitsInByte-1+fieldShift, maskEnd+fieldShift)
-				} else {
-					unmarshalCodeTemp = fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
-						f.Name, byteIndex, ">>", fieldShift,
-						freeBitsInByte-1-fieldShift, maskEnd-fieldShift)
-				}
-				unmarshalCode += unmarshalCodeTemp
-				// generate Test
-				if f.Type == ConstId {
-					testCode += strings.Replace(unmarshalCodeTemp, "c->", "", 1)
+				// generate Marshal if field not temporary
+				if f.Type != TempId {
+					marshalCode += fmt.Sprintf("  ch[%d] |= (c->%s%s%d)&MASK(%d, %d);\n",
+						byteIndex, f.Name, shiftSymbol, fieldShift,
+						freeBitsInByte-1, maskEnd)
+					// generate Unmarshal
+					var unmarshalCodeTemp string
+					if shiftSymbol == ">>" {
+						unmarshalCodeTemp = fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+							f.Name, byteIndex, "<<", fieldShift,
+							freeBitsInByte-1+fieldShift, maskEnd+fieldShift)
+					} else {
+						unmarshalCodeTemp = fmt.Sprintf("  c->%s |= (ch[%d]%s%d)&MASK(%d, %d);\n",
+							f.Name, byteIndex, ">>", fieldShift,
+							freeBitsInByte-1-fieldShift, maskEnd-fieldShift)
+					}
+					unmarshalCode += unmarshalCodeTemp
+					// generate Test
+					if f.Type == ConstId {
+						testCode += strings.Replace(unmarshalCodeTemp, "c->", "", 1)
+					}
 				}
 
 				if maskEnd == 0 {
@@ -147,13 +195,14 @@ func (m *Module) addCCode() {
 					freeBitsInByte -= bitsToMarshal
 				}
 			}
-			marshalCode += "\n"
-			unmarshalCode += "\n"
-			testCode += "\n"
+			// marshalCode += "\n"
+			// unmarshalCode += "\n"
+			// testCode += "\n"
 		}
 		m.Codograms[cidx].CMarshal = marshalCode
 		m.Codograms[cidx].CUnmarshal = unmarshalCode
 		m.Codograms[cidx].CTest = testCode
+		m.Codograms[cidx].CMacros = macrosCode
 	}
 }
 
@@ -163,6 +212,7 @@ func GenerateCFiles(jfilename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	err = m.addCTypes()
 	if err != nil {
 		return "", err
@@ -176,6 +226,9 @@ func GenerateCFiles(jfilename string) (string, error) {
 
 	// generate code
 	ht := template.New("h_template")
+	ht = ht.Funcs(template.FuncMap{"getBlobId": GetBlobId})
+	ht = ht.Funcs(template.FuncMap{"getTempId": GetTempId})
+	ht = ht.Funcs(template.FuncMap{"bytesInBits": BytesInBits})
 	ht, err = ht.Parse(h_template)
 	if err != nil {
 		return "", err

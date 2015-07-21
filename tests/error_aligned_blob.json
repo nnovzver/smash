@@ -1,0 +1,12 @@
+{
+	"Name": "BlobError",
+	"Codograms": [
+		{
+			"Name": "BlobErr",
+			"Fields": [
+				{"Name": "i", "Length": 2,   "Type": 2},
+				{"Name": "b", "Length": 128, "Type": 3}
+				]
+		}
+		]
+}

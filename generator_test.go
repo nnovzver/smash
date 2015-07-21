@@ -25,8 +25,10 @@ var simpleModule Module = Module{
 			Fields: []Field{
 				{Name: "i", Length: 2, Type: 1, Const: 2},
 				{Name: "j", Length: 7, Type: 1, Const: 4},
-				{Name: "k", Length: 16},
-				{Name: "l", Length: 32},
+				{Name: "k", Length: 16, Type: 2},
+				{Name: "l", Length: 32, Type: 2},
+				{Name: "t", Length: 7, Type: 4},
+				{Name: "b", Length: 128, Type: 3},
 			},
 		},
 	},
@@ -42,8 +44,10 @@ var simpleModuleCode Module = Module{
 				{Name: "j", Length: 7, CType: "uint8_t"},
 				{Name: "k", Length: 16, CType: "uint16_t"},
 				{Name: "l", Length: 32, CType: "uint32_t"},
+				{Name: "t", Length: 7},
+				{Name: "b", Length: 128},
 			},
-			CLength: 8,
+			CLength: 24,
 			CMarshal: `
 ch[0] |= (c->i<<6)&MASK(7, 6);
 
@@ -82,6 +86,11 @@ i |= (ch[0]>>6)&MASK(1, 0);
 j |= (ch[0]<<1)&MASK(6, 1);
 j |= (ch[1]>>7)&MASK(0, 0);
 `,
+
+			CMacros: `
+#define First_BEGIN_b_BLOB 8
+#define First_SIZE_b_BLOB 16
+`,
 		},
 	},
 }
@@ -91,9 +100,8 @@ func TestParseJsonModule(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	if !reflect.DeepEqual(m, simpleModule) {
-		t.Error("m, orig not equal")
+		t.Errorf("m, orig not equal\n m =\n%+v\n orig =\n%+v\n", m, simpleModule)
 	}
 }
 
@@ -146,5 +154,22 @@ func TestAddCTest(t *testing.T) {
 	orig := simplifyString(simpleModuleCode.Codograms[0].CTest)
 	if res != orig {
 		t.Errorf("Unexpected CTest\n res =\n %s\n orig =\n %s\n", res, orig)
+	}
+}
+
+func TestAddCMacros(t *testing.T) {
+	m := simpleModule
+	m.addCCode()
+	res := simplifyString(m.Codograms[0].CMacros)
+	orig := simplifyString(simpleModuleCode.Codograms[0].CMacros)
+	if res != orig {
+		t.Errorf("Unexpected CMacros\n res =\n %s\n orig =\n %s\n", res, orig)
+	}
+}
+
+func TestErrorAlignedBlob(t *testing.T) {
+	_, err := parseJsonModule("tests/error_aligned_blob.json")
+	if err == nil {
+		t.Error(err)
 	}
 }
