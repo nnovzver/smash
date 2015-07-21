@@ -82,7 +82,7 @@ func (m *Module) checkModule() error {
 	for _, c := range m.Codograms {
 		bitsBefore := 0
 		for _, f := range c.Fields {
-			if f.Type == BlobId && (bitsBefore % 8 != 0 || int(f.Length) % 8 != 0) {
+			if f.Type == BlobId && (bitsBefore%8 != 0 || int(f.Length)%8 != 0) {
 				return fmt.Errorf("Blob %s in codogram %s not aligned!", f.Name, c.Name)
 			}
 			bitsBefore += int(f.Length)
@@ -140,9 +140,9 @@ func (m *Module) addCCode() {
 		for _, f := range c.Fields {
 			if f.Type == BlobId {
 				macrosCode += fmt.Sprintf("#define %s_BEGIN_%s_BLOB %d\n",
-				                          c.Name, f.Name, byteIndex)
+					c.Name, f.Name, byteIndex)
 				macrosCode += fmt.Sprintf("#define %s_SIZE_%s_BLOB %d\n",
-				                          c.Name, f.Name, int(f.Length) / 8)
+					c.Name, f.Name, int(f.Length)/8)
 				continue
 			}
 			bitsToMarshal := int(f.Length)
