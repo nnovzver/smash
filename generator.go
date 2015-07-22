@@ -34,12 +34,14 @@ func BytesInBits(bits float64) float64 {
 }
 
 type Field struct {
-	Name   string
-	Length float64
-	Type   string
-	Const  float64
-	Enum   string
-	CType  string
+	Name       string
+	Length     float64
+	Type       string
+	Const      float64
+	Enum       string
+	CType      string
+	BlobOffset int
+	BlobSize   int
 }
 
 type Codogram struct {
@@ -138,13 +140,16 @@ func (m *Module) addCCode() {
 		var unmarshalCode string
 		var testCode string
 		var macrosCode string
-		for _, f := range c.Fields {
+		for fidx, f := range c.Fields {
 			// generate Macros
 			if f.Type == BlobId {
 				macrosCode += fmt.Sprintf("#define %s_BEGIN_%s_BLOB %d\n",
 					c.Name, f.Name, byteIndex)
 				macrosCode += fmt.Sprintf("#define %s_SIZE_%s_BLOB %d\n",
 					c.Name, f.Name, int(f.Length)/8)
+
+				m.Codograms[cidx].Fields[fidx].BlobOffset = byteIndex
+				m.Codograms[cidx].Fields[fidx].BlobSize = int(f.Length) / 8
 				continue
 			}
 			if f.Enum != "" {
@@ -251,6 +256,7 @@ func GenerateCFiles(jfilename string) (string, error) {
 
 	ct := template.New("c_template")
 	ct = ct.Funcs(template.FuncMap{"getConstId": GetConstId})
+	ct = ct.Funcs(template.FuncMap{"getBlobId": GetBlobId})
 	ct, err = ct.Parse(c_template)
 	if err != nil {
 		return "", err
