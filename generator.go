@@ -143,9 +143,9 @@ func (m *Module) addCCode() {
 		for fidx, f := range c.Fields {
 			// generate Macros
 			if f.Type == BlobId {
-				macrosCode += fmt.Sprintf("#define %s_BEGIN_%s_BLOB %d\n",
+				macrosCode += fmt.Sprintf("#define %s__%s_OFFSET %d\n",
 					c.Name, f.Name, byteIndex)
-				macrosCode += fmt.Sprintf("#define %s_SIZE_%s_BLOB %d\n",
+				macrosCode += fmt.Sprintf("#define %s__%s_SIZE %d\n",
 					c.Name, f.Name, int(f.Length)/8)
 
 				m.Codograms[cidx].Fields[fidx].BlobOffset = byteIndex
@@ -156,8 +156,8 @@ func (m *Module) addCCode() {
 				for _, s := range strings.Split(f.Enum, ",") {
 					val := strings.Split(s, ":")
 					if val != nil {
-						macrosCode += fmt.Sprintf("#define %s_ENUM_%s_%s %s\n",
-							c.Name, f.Name,
+						macrosCode += fmt.Sprintf("#define %s__%s %s\n",
+							c.Name,
 							strings.Trim(val[0], " \t\n"),
 							strings.Trim(val[1], " \t\n"))
 					}

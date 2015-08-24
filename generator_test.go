@@ -88,10 +88,10 @@ j |= (ch[1]>>7)&MASK(0, 0);
 `,
 
 			CMacros: `
-#define First_ENUM_k_APPLE 1
-#define First_ENUM_k_PEAR 2
-#define First_BEGIN_b_BLOB 8
-#define First_SIZE_b_BLOB 16
+#define First__APPLE 1
+#define First__PEAR 2
+#define First__b_OFFSET 8
+#define First__b_SIZE 16
 `,
 		},
 	},
