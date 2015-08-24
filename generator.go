@@ -140,6 +140,15 @@ func (m *Module) addCCode() {
 		var unmarshalCode string
 		var testCode string
 		var macrosCode string
+
+		// add codogram size macros
+		codogramSize := 0
+		for _, f := range c.Fields {
+			codogramSize += int(f.Length)
+		}
+		macrosCode += fmt.Sprintf("#define %s__SIZE %d\n",
+			c.Name, codogramSize/8)
+
 		for fidx, f := range c.Fields {
 			// generate Macros
 			if f.Type == BlobId {
@@ -215,6 +224,7 @@ func (m *Module) addCCode() {
 				}
 			}
 		}
+
 		m.Codograms[cidx].CMarshal = marshalCode
 		m.Codograms[cidx].CUnmarshal = unmarshalCode
 		m.Codograms[cidx].CTest = testCode
