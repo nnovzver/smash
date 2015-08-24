@@ -6,6 +6,10 @@ var h_template = `/*
  */
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 {{range .Codograms}}
 {{.CMacros}}
 typedef struct {{.Name}} {
@@ -18,4 +22,8 @@ int Marshal_{{.Name}}({{.Name}} *c, void *buff, size_t size);
 int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size);
 {{if .CTest}}int is{{.Name}}(void *buff, size_t size);{{end}}
 {{end}}
+
+#ifdef __cplusplus
+}
+#endif
 `
