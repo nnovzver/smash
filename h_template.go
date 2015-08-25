@@ -20,7 +20,7 @@ typedef struct {{.Name}} {
 
 int Marshal_{{.Name}}({{.Name}} *c, void *buff, size_t size);
 int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size);
-{{if .CTest}}int is{{.Name}}(void *buff, size_t size);{{end}}
+{{if .CTest}}int Is_{{.Name}}(void *buff, size_t size);{{end}}
 {{end}}
 
 #ifdef __cplusplus

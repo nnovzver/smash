@@ -43,7 +43,7 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
 }
 
 {{if .CTest}}
-int is{{.Name}}(void *buff, size_t size) {
+int Is_{{.Name}}(void *buff, size_t size) {
 {{range .Fields}}{{if eq .Type getConstId}}  {{.CType}} {{.Name}} = 0;
 {{end}}{{end}}` +
 	`  char *ch = buff;

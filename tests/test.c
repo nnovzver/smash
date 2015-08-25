@@ -51,7 +51,7 @@ int main() {
   }
 
   // test test =)
-  if (isFirst(buf, sizeof(First)) != 1) {
+  if (Is_First(buf, sizeof(First)) != 1) {
     printf("FAIL! test\n");
     return 1;
   }
