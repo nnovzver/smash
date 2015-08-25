@@ -151,6 +151,10 @@ func (m *Module) addCCode() {
 
 		for fidx, f := range c.Fields {
 			// generate Macros
+			if f.Type == ConstId {
+				macrosCode += fmt.Sprintf("#define %s__%s %d\n",
+					c.Name, strings.ToUpper(f.Name), int(f.Const))
+			}
 			if f.Type == BlobId {
 				macrosCode += fmt.Sprintf("#define %s__%s_OFFSET %d\n",
 					c.Name, f.Name, byteIndex)

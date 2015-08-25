@@ -89,6 +89,8 @@ j |= (ch[1]>>7)&MASK(0, 0);
 
 			CMacros: `
 #define First__SIZE 24
+#define First__I 2
+#define First__J 4
 #define First__APPLE 1
 #define First__PEAR 2
 #define First__b_OFFSET 8
