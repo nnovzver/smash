@@ -288,28 +288,34 @@ func GenerateCFiles(jfilename string) (string, error) {
 		return "", err
 	}
 
-	// write to str from buffers
-	str := string(hbuf.String())
-	str += string(cbuf.String())
+	// string for stdout
+	var str string
 
 	// create files
-	hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.h")
-	if err != nil {
-		return "", err
-	}
-	cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.c")
-	if err != nil {
-		return "", err
+	if hOnly == cOnly || hOnly {
+		str += string(hbuf.String())
+		hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.h")
+		if err != nil {
+			return "", err
+		}
+
+		_, err = hbuf.WriteTo(hfile)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	// write to files from buffers
-	_, err = hbuf.WriteTo(hfile)
-	if err != nil {
-		return "", err
-	}
-	_, err = cbuf.WriteTo(cfile)
-	if err != nil {
-		return "", err
+	if hOnly == cOnly || cOnly {
+		str += string(cbuf.String())
+		cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.c")
+		if err != nil {
+			return "", err
+		}
+
+		_, err = cbuf.WriteTo(cfile)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return str, nil

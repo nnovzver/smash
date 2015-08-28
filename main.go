@@ -8,9 +8,13 @@ import (
 )
 
 var stdOut bool
+var hOnly bool
+var cOnly bool
 
 func init() {
 	flag.BoolVar(&stdOut, "s", false, "print generated code to stdout")
+	flag.BoolVar(&hOnly, "h", false, "generate .h header only")
+	flag.BoolVar(&cOnly, "c", false, "generate .c source only")
 }
 
 func main() {
