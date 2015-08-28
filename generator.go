@@ -124,6 +124,7 @@ func (m *Module) addCLengths() {
 			len += int(f.Length)
 		}
 		m.Codograms[i].CLength = (len + 7) / 8
+		len = 0
 	}
 
 }
