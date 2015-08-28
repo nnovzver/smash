@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 )
 
 var stdOut bool
@@ -25,6 +26,10 @@ func main() {
 		return
 	}
 	filename := flag.Args()[0]
+
+	if strings.HasSuffix(filename, ".json") != true {
+		fmt.Fprintf(os.Stderr, "File extension should be .json: %s\n", filename)
+	}
 
 	_, err := os.Stat(filename)
 	if err != nil {

@@ -56,6 +56,7 @@ type Codogram struct {
 
 type Module struct {
 	Name      string
+	FileName  string
 	Codograms []Codogram
 }
 
@@ -127,6 +128,11 @@ func (m *Module) addCLengths() {
 		len = 0
 	}
 
+}
+
+func (m *Module) addFileName(filename string) {
+	basename := strings.TrimSuffix(filepath.Base(filename), ".json")
+	m.FileName = basename
 }
 
 func (m *Module) addCCode() {
@@ -250,6 +256,7 @@ func GenerateCFiles(jfilename string) (string, error) {
 	}
 	m.addCLengths()
 	m.addCCode()
+	m.addFileName(jfilename)
 
 	// create buffers
 	hbuf := new(bytes.Buffer)
@@ -286,11 +293,11 @@ func GenerateCFiles(jfilename string) (string, error) {
 	str += string(cbuf.String())
 
 	// create files
-	hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".gen.h")
+	hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.h")
 	if err != nil {
 		return "", err
 	}
-	cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.Name + ".gen.c")
+	cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.c")
 	if err != nil {
 		return "", err
 	}

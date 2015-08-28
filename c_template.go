@@ -7,7 +7,7 @@ var c_template = `/*
 
 #include <string.h>
 
-#include "{{.Name}}.gen.h"
+#include "{{.FileName}}.gen.h"
 
 #define MASK(start, end) ( \
   (((1 << (start - end + 1)) - 1) << end) \

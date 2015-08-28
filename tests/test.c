@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "Simple.gen.h"
+#include "simple_proto.gen.h"
 
 int main() {
   int err;
