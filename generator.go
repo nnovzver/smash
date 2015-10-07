@@ -288,13 +288,20 @@ func GenerateCFiles(jfilename string) (string, error) {
 		return "", err
 	}
 
+	var odir string
+	if outputDir == "" {
+		odir = filepath.Dir(jfilename)
+	} else {
+		odir = outputDir
+	}
+
 	// string for stdout
 	var str string
 
 	// create files
 	if hOnly == cOnly || hOnly {
 		str += string(hbuf.String())
-		hfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.h")
+		hfile, err := os.Create(odir + "/" + m.FileName + ".gen.h")
 		if err != nil {
 			return "", err
 		}
@@ -307,7 +314,7 @@ func GenerateCFiles(jfilename string) (string, error) {
 
 	if hOnly == cOnly || cOnly {
 		str += string(cbuf.String())
-		cfile, err := os.Create(filepath.Dir(jfilename) + "/" + m.FileName + ".gen.c")
+		cfile, err := os.Create(odir + "/" + m.FileName + ".gen.c")
 		if err != nil {
 			return "", err
 		}
