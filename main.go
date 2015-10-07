@@ -10,6 +10,7 @@ import (
 var stdOut bool
 var hOnly bool
 var cOnly bool
+var genAll bool = false
 var outputDir string
 
 func init() {
@@ -44,6 +45,9 @@ func main() {
 		return
 	}
 
+	if !(hOnly || cOnly) {
+		genAll = true
+	}
 	code, err := GenerateCFiles(filename)
 	if err != nil {
 		panic(err)
