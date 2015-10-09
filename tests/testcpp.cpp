@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <QByteArray>
 
-#include "simple_proto.gen.hpp"
+#include "simple_proto.gen.cw.hpp"
 
 int cpptest() {
   Codograms::First tomarshal;

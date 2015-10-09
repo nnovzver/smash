@@ -5,7 +5,7 @@ var cpp_template = `/*
  * Auto-generated file! DO NOT MODIFY!
  */
 
-#include "{{.FileName}}.gen.hpp"
+#include "{{.FileName}}.gen.cw.hpp"
 
 {{range .Codograms}}
 Codograms::{{.Name}}::{{.Name}}()

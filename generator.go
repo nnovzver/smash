@@ -350,7 +350,7 @@ func GenerateCFiles(jfilename string) (string, error) {
 
 	if hppOnly || genAll {
 		str += hppbuf.String()
-		hppfile, err := os.Create(odir + "/" + m.FileName + ".gen.hpp")
+		hppfile, err := os.Create(odir + "/" + m.FileName + ".gen.cw.hpp")
 		if err != nil {
 			return "", err
 		}
@@ -363,7 +363,7 @@ func GenerateCFiles(jfilename string) (string, error) {
 
 	if cppOnly || genAll {
 		str += cppbuf.String()
-		cppfile, err := os.Create(odir + "/" + m.FileName + ".gen.cpp")
+		cppfile, err := os.Create(odir + "/" + m.FileName + ".gen.cw.cpp")
 		if err != nil {
 			return "", err
 		}

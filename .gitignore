@@ -31,5 +31,5 @@ runtest
 # generated files
 *.gen.c
 *.gen.h
-*.gen.cpp
-*.gen.hpp
+*.gen.cw.cpp
+*.gen.cw.hpp
