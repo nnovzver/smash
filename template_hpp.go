@@ -4,6 +4,8 @@ var hpp_template = `/*
  * CPP header for {{.Name}} codogram module
  * Auto-generated file! DO NOT MODIFY!
  */
+#ifndef {{.FileName}}_GEN_CW_HPP
+#define {{.FileName}}_GEN_CW_HPP
 
 #include <QByteArray>
 
@@ -39,4 +41,5 @@ public:
 {{end}}
 
 }
+#endif // {{.FileName}}_GEN_CW_HPP
 `

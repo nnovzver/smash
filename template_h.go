@@ -4,6 +4,9 @@ var h_template = `/*
  * C header for {{.Name}} codogram module
  * Auto-generated file! DO NOT MODIFY!
  */
+#ifndef {{.FileName}}_GEN_H
+#define {{.FileName}}_GEN_H
+
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -26,4 +29,6 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // {{.FileName}}_GEN_H
 `
