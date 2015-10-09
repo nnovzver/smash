@@ -1,2 +1,2 @@
 # smash
-Generate C structs with Marshal-Unmarshal code from JSON description.
+Generate C structs (and CPP wrappers) with Marshal-Unmarshal code from JSON description.
