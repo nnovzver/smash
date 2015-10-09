@@ -24,7 +24,7 @@ int Marshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
   {{range .Fields}}{{if eq .Type getConstId}}c->{{.Name}} = {{.Const}};
   {{end}}{{end}}
 {{.CMarshal}}` +
-`{{range .Fields}}{{if eq .Type getBlobId}}  memcpy(&((uint8_t*)buff)[{{.BlobOffset}}], c->{{.Name}}, {{.BlobSize}});{{end}}{{end}}
+	`{{range .Fields}}{{if eq .Type getBlobId}}  memcpy(&((uint8_t*)buff)[{{.BlobOffset}}], c->{{.Name}}, {{.BlobSize}});{{end}}{{end}}
 
   return 0;
 }
@@ -37,7 +37,7 @@ int Unmarshal_{{.Name}}({{.Name}} *c, void *buff, size_t size) {
   memset(c, 0, size);
 
 {{.CUnmarshal}}` +
-`{{range .Fields}}{{if eq .Type getBlobId}}  memcpy(c->{{.Name}}, &((uint8_t*)buff)[{{.BlobOffset}}], {{.BlobSize}});{{end}}{{end}}
+	`{{range .Fields}}{{if eq .Type getBlobId}}  memcpy(c->{{.Name}}, &((uint8_t*)buff)[{{.BlobOffset}}], {{.BlobSize}});{{end}}{{end}}
 
   return 0;
 }

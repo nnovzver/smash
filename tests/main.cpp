@@ -1,4 +1,4 @@
-#include "ctest.h"
+#include "testc.h"
 
 int ctest();
 int cpptest();
