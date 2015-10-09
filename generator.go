@@ -153,7 +153,7 @@ func (m *Module) addCCode() {
 		for _, f := range c.Fields {
 			codogramSize += int(f.Length)
 		}
-		macrosCode += fmt.Sprintf("#define %s__SIZE %d\n",
+		macrosCode += fmt.Sprintf("#define %s__BUFSIZE %d\n",
 			c.Name, codogramSize/8)
 
 		for fidx, f := range c.Fields {
@@ -261,6 +261,8 @@ func GenerateCFiles(jfilename string) (string, error) {
 	// create buffers
 	hbuf := new(bytes.Buffer)
 	cbuf := new(bytes.Buffer)
+	hppbuf := new(bytes.Buffer)
+	cppbuf := new(bytes.Buffer)
 
 	// generate code
 	ht := template.New("h_template")
@@ -288,6 +290,27 @@ func GenerateCFiles(jfilename string) (string, error) {
 		return "", err
 	}
 
+	hppt := template.New("hpp_template")
+	hppt, err = hppt.Parse(hpp_template)
+	if err != nil {
+		return "", err
+	}
+	err = hppt.Execute(hppbuf, m)
+	if err != nil {
+		return "", err
+	}
+
+	cppt := template.New("cpp_template")
+	cppt, err = cppt.Parse(cpp_template)
+	if err != nil {
+		return "", err
+	}
+	err = cppt.Execute(cppbuf, m)
+	if err != nil {
+		return "", err
+	}
+
+	// form output dir
 	var odir string
 	if outputDir == "" {
 		odir = filepath.Dir(jfilename)
@@ -320,6 +343,32 @@ func GenerateCFiles(jfilename string) (string, error) {
 		}
 
 		_, err = cbuf.WriteTo(cfile)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if hppOnly || genAll {
+		str += hppbuf.String()
+		hppfile, err := os.Create(odir + "/" + m.FileName + ".gen.hpp")
+		if err != nil {
+			return "", err
+		}
+
+		_, err = hppbuf.WriteTo(hppfile)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if cppOnly || genAll {
+		str += cppbuf.String()
+		cppfile, err := os.Create(odir + "/" + m.FileName + ".gen.cpp")
+		if err != nil {
+			return "", err
+		}
+
+		_, err = cppbuf.WriteTo(cppfile)
 		if err != nil {
 			return "", err
 		}

@@ -10,13 +10,17 @@ import (
 var stdOut bool
 var hOnly bool
 var cOnly bool
+var cppOnly bool
+var hppOnly bool
 var genAll bool = false
 var outputDir string
 
 func init() {
 	flag.BoolVar(&stdOut, "s", false, "print generated code to stdout")
-	flag.BoolVar(&hOnly, "h", false, "generate .h header only")
-	flag.BoolVar(&cOnly, "c", false, "generate .c source only")
+	flag.BoolVar(&hOnly, "h", false, "generate C .h header only")
+	flag.BoolVar(&cOnly, "c", false, "generate C .c source only")
+	flag.BoolVar(&hppOnly, "H", false, "generate C++ .hpp header only. Only make sense with .h!")
+	flag.BoolVar(&cppOnly, "C", false, "generate C++ .cpp source only. Only make sense with .c!")
 	flag.StringVar(&outputDir, "o", "", "output directory. Default the same directory where .json")
 }
 
@@ -45,7 +49,7 @@ func main() {
 		return
 	}
 
-	if !(hOnly || cOnly) {
+	if !(hOnly || cOnly || hppOnly || cppOnly) {
 		genAll = true
 	}
 	code, err := GenerateCFiles(filename)

@@ -1,7 +1,7 @@
 package main
 
 var c_template = `/*
- * Implementation for {{.Name}} codogram module.
+ * C implementation for {{.Name}} codogram module.
  * Auto-generated file! DO NOT MODIFY!
  */
 

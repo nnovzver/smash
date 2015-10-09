@@ -1,7 +1,7 @@
 package main
 
 var h_template = `/*
- * Header for {{.Name}} codogram module
+ * C header for {{.Name}} codogram module
  * Auto-generated file! DO NOT MODIFY!
  */
 #include <stdint.h>
