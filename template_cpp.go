@@ -40,6 +40,11 @@ bool Codograms::{{.Name}}::checkBuf()
     return false;  
 }
 
+const QByteArray& Codograms::{{.Name}}::getBuf()
+{
+  return buf;
+}
+
 void Codograms::{{.Name}}::clearMessage()
 {
   memset(&m, 0, sizeof(m));

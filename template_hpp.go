@@ -21,6 +21,8 @@ public:
   virtual bool unmarshal() = 0;
   virtual bool checkBuf() = 0;
   virtual void clearMessage() = 0;
+  virtual const QByteArray& getBuf() = 0;
+  virtual ~Codogram() {};
 };
 #endif
 
@@ -31,6 +33,7 @@ public:
   bool marshal();
   bool unmarshal();
   bool checkBuf();
+  const QByteArray& getBuf();
   void clearMessage();
   int msize();
 
